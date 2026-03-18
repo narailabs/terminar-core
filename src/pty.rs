@@ -170,6 +170,11 @@ impl portable_pty::Child for MockChild {
     fn process_id(&self) -> Option<u32> {
         Some(12345)
     }
+
+    #[cfg(windows)]
+    fn as_raw_handle(&self) -> Option<std::os::windows::io::RawHandle> {
+        None
+    }
 }
 
 pub struct MockMasterPty {
@@ -219,10 +224,6 @@ impl portable_pty::MasterPty for MockMasterPty {
     }
     #[cfg(unix)]
     fn as_raw_fd(&self) -> Option<std::os::unix::io::RawFd> {
-        None
-    }
-    #[cfg(windows)]
-    fn as_raw_handle(&self) -> Option<std::os::windows::io::RawHandle> {
         None
     }
 }
