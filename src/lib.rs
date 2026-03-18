@@ -17,6 +17,7 @@ pub mod engine;
 pub mod history;
 pub mod messages;
 pub mod persistence;
+#[cfg(unix)]
 pub mod process;
 pub mod pty;
 pub mod session;
