@@ -214,11 +214,11 @@ impl portable_pty::MasterPty for MockMasterPty {
         }))
     }
     #[cfg(unix)]
-    fn process_group_leader(&self) -> Option<i32> {
+    fn process_group_leader(&self) -> Option<libc::pid_t> {
         Some(1)
     }
     #[cfg(unix)]
-    fn as_raw_fd(&self) -> Option<i32> {
+    fn as_raw_fd(&self) -> Option<std::os::unix::io::RawFd> {
         None
     }
     #[cfg(windows)]
