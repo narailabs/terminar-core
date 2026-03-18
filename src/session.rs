@@ -191,7 +191,10 @@ impl Session {
         history: Arc<Mutex<CircularBuffer>>,
     ) -> Result<Self, String> {
         // Capture the raw fd before wrapping - used for tcgetpgrp() calls
+        #[cfg(unix)]
         let pty_fd = master.as_raw_fd();
+        #[cfg(not(unix))]
+        let pty_fd: Option<i32> = None;
         // Take the writer before wrapping master to cache it for the session lifetime
         let writer = master
             .take_writer()

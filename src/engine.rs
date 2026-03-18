@@ -236,7 +236,10 @@ pub fn create_session(
     let tx_clone = tx.clone();
 
     // Capture the raw fd before wrapping - used for tcgetpgrp() foreground process detection
+    #[cfg(unix)]
     let pty_fd = master.as_raw_fd();
+    #[cfg(not(unix))]
+    let pty_fd: Option<i32> = None;
 
     // Wrap master in Arc<Mutex<>> for synchronized concurrent access
     let sync_master = Arc::new(Mutex::new(master));
