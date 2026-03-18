@@ -149,9 +149,11 @@ pub struct Session {
     pub history: Arc<Mutex<CircularBuffer>>,
     /// Handle to the reader thread, used for cleanup
     pub reader_handle: Option<tokio::task::JoinHandle<()>>,
-    /// Raw file descriptor of the PTY master, used for `tcgetpgrp()` calls.
-    /// `None` for mock PTYs that don't have a real fd.
-    pub pty_fd: Option<std::os::unix::io::RawFd>,
+    /// Raw file descriptor of the PTY master, used for `tcgetpgrp()` calls on Unix.
+    /// `None` for mock PTYs that don't have a real fd, or on non-Unix platforms.
+    /// Stored as `i32` to match `portable_pty::MasterPty::as_raw_fd()` return type
+    /// and avoid depending on `std::os::unix::io::RawFd`.
+    pub pty_fd: Option<i32>,
     /// Name of the foreground process (e.g., "vim", "claude")
     pub foreground_process: Option<String>,
     /// Timestamp of last output from the PTY (shared with reader task)
