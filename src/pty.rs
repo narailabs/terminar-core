@@ -213,10 +213,16 @@ impl portable_pty::MasterPty for MockMasterPty {
             sender: self.sender.clone(),
         }))
     }
+    #[cfg(unix)]
     fn process_group_leader(&self) -> Option<i32> {
         Some(1)
     }
+    #[cfg(unix)]
     fn as_raw_fd(&self) -> Option<i32> {
+        None
+    }
+    #[cfg(windows)]
+    fn as_raw_handle(&self) -> Option<std::os::windows::io::RawHandle> {
         None
     }
 }
