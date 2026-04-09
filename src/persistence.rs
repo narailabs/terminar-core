@@ -20,6 +20,8 @@ pub struct PersistedSession {
     pub cwd: String,
     pub pid: Option<u32>,
     pub state: String,
+    #[serde(default)]
+    pub container_id: Option<String>,
 }
 
 /// Container for all persisted sessions.
@@ -85,6 +87,7 @@ pub fn build_persisted_data(sessions: &crate::session::SessionMap) -> PersistedS
             cwd: s.cwd.clone(),
             pid: None,
             state: format!("{:?}", s.state),
+            container_id: s.container_id.clone(),
         })
         .collect();
     PersistedSessionData {
@@ -239,6 +242,7 @@ mod tests {
             cwd: "/home/user".to_string(),
             pid: Some(1234),
             state: "Running".to_string(),
+            container_id: None,
         };
         let json = serde_json::to_string(&session).unwrap();
         assert!(json.contains("abc-123"));
@@ -287,6 +291,7 @@ mod tests {
                 cwd: "/tmp".to_string(),
                 pid: Some(111),
                 state: "Running".to_string(),
+                container_id: None,
             }],
         };
 

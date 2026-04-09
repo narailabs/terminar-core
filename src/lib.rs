@@ -22,7 +22,7 @@ pub mod process;
 pub mod pty;
 pub mod session;
 
-pub use engine::create_session;
+pub use engine::{create_session, create_session_with_command};
 pub use history::CircularBuffer;
 pub use messages::{CoreClientMessage, CoreServerMessage, SessionInfo};
 pub use pty::{MockPtyProvider, NativePtyProvider, PtyProvider};

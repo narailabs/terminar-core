@@ -114,6 +114,15 @@ pub struct SessionInfo {
     /// Exit code if the shell has exited.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub exit_code: Option<i32>,
+    /// Docker container ID if this is a container session.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub container_id: Option<String>,
+    /// Docker container name for display.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub container_name: Option<String>,
+    /// Docker container image for display.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub container_image: Option<String>,
 }
 
 #[cfg(test)]
@@ -165,6 +174,9 @@ mod tests {
             foreground_process: None,
             last_activity_at: None,
             exit_code: None,
+            container_id: None,
+            container_name: None,
+            container_image: None,
         };
         let msg = CoreServerMessage::SessionList {
             sessions: vec![info],
@@ -236,6 +248,9 @@ mod tests {
             foreground_process: None,
             last_activity_at: None,
             exit_code: Some(0),
+            container_id: None,
+            container_name: None,
+            container_image: None,
         };
         let json = serde_json::to_string(&info).unwrap();
         assert!(json.contains(r#""exit_code":0"#));

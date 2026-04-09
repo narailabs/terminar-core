@@ -156,6 +156,9 @@ pub fn build_session_list(sessions: &SessionMap) -> Vec<SessionInfo> {
             foreground_process: s.foreground_process.clone(),
             last_activity_at: s.last_output_at.lock().map(|_| "now".to_string()),
             exit_code: s.exit_code,
+            container_id: s.container_id.clone(),
+            container_name: None,
+            container_image: None,
         })
         .collect()
 }
@@ -185,7 +188,41 @@ pub fn create_session(
     initial_history: Option<&[u8]>,
 ) -> Result<String, Box<dyn std::error::Error>> {
     let safe_env = filter_env(env);
+    let mut cmd = CommandBuilder::new(shell_cmd);
+    cmd.cwd(cwd);
+    cmd.env("TERM", "xterm-256color");
+    cmd.env("COLORTERM", "truecolor");
+    for (k, v) in &safe_env {
+        cmd.env(k, v);
+    }
+    create_session_with_command(
+        session_id, name, shell_cmd, cwd, cols, rows,
+        cmd, sessions, mock_provider, initial_history, None,
+    )
+}
 
+/// Lower-level session creation with a pre-built command.
+///
+/// Used for custom session types (Docker containers, SSH, etc.) where the
+/// command construction differs from a simple shell spawn.
+///
+/// - `shell_cmd` and `cwd` are for display/metadata only (shown in UI)
+/// - `cmd` is the actual CommandBuilder that will be spawned in the PTY
+/// - `container_id` is set on the Session for Docker container sessions
+#[allow(clippy::too_many_arguments)]
+pub fn create_session_with_command(
+    session_id: Option<&str>,
+    name: &str,
+    shell_cmd: &str,
+    cwd: &str,
+    cols: u16,
+    rows: u16,
+    cmd: CommandBuilder,
+    sessions: &SessionMap,
+    mock_provider: Option<&Arc<MockPtyProvider>>,
+    initial_history: Option<&[u8]>,
+    container_id: Option<String>,
+) -> Result<String, Box<dyn std::error::Error>> {
     let master: Box<dyn portable_pty::MasterPty + Send>;
 
     if let Some(provider) = mock_provider {
@@ -200,14 +237,6 @@ pub fn create_session(
             pixel_height: 0,
         })?;
         master = pair.master;
-
-        let mut cmd = CommandBuilder::new(shell_cmd);
-        cmd.cwd(cwd);
-        cmd.env("TERM", "xterm-256color");
-        cmd.env("COLORTERM", "truecolor");
-        for (k, v) in &safe_env {
-            cmd.env(k, v);
-        }
         let _c = pair.slave.spawn_command(cmd)?;
     }
 
@@ -362,6 +391,7 @@ pub fn create_session(
         exit_code: None,
         silence_notified: session_silence_notified,
         silence_threshold_secs: 30,
+        container_id,
     };
 
     {

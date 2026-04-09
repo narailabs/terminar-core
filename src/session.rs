@@ -168,6 +168,10 @@ pub struct Session {
     pub silence_notified: Arc<AtomicBool>,
     /// Silence threshold in seconds (default: 30)
     pub silence_threshold_secs: u64,
+    /// Docker container ID if this session runs inside a container.
+    /// When Some, foreground process polling is skipped (tcgetpgrp returns
+    /// the host docker process, not the shell inside the container).
+    pub container_id: Option<String>,
 }
 
 pub type SessionMap = Arc<Mutex<HashMap<String, Session>>>;
@@ -189,6 +193,7 @@ impl Session {
         master: Box<dyn portable_pty::MasterPty + Send>,
         output_tx: broadcast::Sender<SessionEvent>,
         history: Arc<Mutex<CircularBuffer>>,
+        container_id: Option<String>,
     ) -> Result<Self, String> {
         // Capture the raw fd before wrapping - used for tcgetpgrp() calls
         #[cfg(unix)]
@@ -218,6 +223,7 @@ impl Session {
             exit_code: None,
             silence_notified: Arc::new(AtomicBool::new(false)),
             silence_threshold_secs: 30,
+            container_id,
         })
     }
 
@@ -303,6 +309,7 @@ mod tests {
             master,
             tx,
             history,
+            None,
         )
         .unwrap()
     }
