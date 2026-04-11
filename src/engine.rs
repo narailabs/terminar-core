@@ -159,6 +159,9 @@ pub fn build_session_list(sessions: &SessionMap) -> Vec<SessionInfo> {
             container_id: s.container_id.clone(),
             container_name: None,
             container_image: None,
+            ssh_connection_id: s.ssh_connection_id.clone(),
+            ssh_host: None,
+            ssh_user: None,
         })
         .collect()
 }
@@ -197,7 +200,7 @@ pub fn create_session(
     }
     create_session_with_command(
         session_id, name, shell_cmd, cwd, cols, rows,
-        cmd, sessions, mock_provider, initial_history, None,
+        cmd, sessions, mock_provider, initial_history, None, None,
     )
 }
 
@@ -222,6 +225,7 @@ pub fn create_session_with_command(
     mock_provider: Option<&Arc<MockPtyProvider>>,
     initial_history: Option<&[u8]>,
     container_id: Option<String>,
+    ssh_connection_id: Option<String>,
 ) -> Result<String, Box<dyn std::error::Error>> {
     let master: Box<dyn portable_pty::MasterPty + Send>;
 
@@ -392,6 +396,7 @@ pub fn create_session_with_command(
         silence_notified: session_silence_notified,
         silence_threshold_secs: 30,
         container_id,
+        ssh_connection_id,
     };
 
     {

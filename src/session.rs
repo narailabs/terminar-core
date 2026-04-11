@@ -172,6 +172,10 @@ pub struct Session {
     /// When Some, foreground process polling is skipped (tcgetpgrp returns
     /// the host docker process, not the shell inside the container).
     pub container_id: Option<String>,
+    /// SSH connection ID if this session runs over SSH.
+    /// When Some, foreground process polling is skipped (tcgetpgrp returns
+    /// the local ssh client process, not the remote shell).
+    pub ssh_connection_id: Option<String>,
 }
 
 pub type SessionMap = Arc<Mutex<HashMap<String, Session>>>;
@@ -194,6 +198,7 @@ impl Session {
         output_tx: broadcast::Sender<SessionEvent>,
         history: Arc<Mutex<CircularBuffer>>,
         container_id: Option<String>,
+        ssh_connection_id: Option<String>,
     ) -> Result<Self, String> {
         // Capture the raw fd before wrapping - used for tcgetpgrp() calls
         #[cfg(unix)]
@@ -224,6 +229,7 @@ impl Session {
             silence_notified: Arc::new(AtomicBool::new(false)),
             silence_threshold_secs: 30,
             container_id,
+            ssh_connection_id,
         })
     }
 
@@ -309,6 +315,7 @@ mod tests {
             master,
             tx,
             history,
+            None,
             None,
         )
         .unwrap()

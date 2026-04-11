@@ -123,6 +123,15 @@ pub struct SessionInfo {
     /// Docker container image for display.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub container_image: Option<String>,
+    /// SSH connection ID if this is an SSH session.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ssh_connection_id: Option<String>,
+    /// SSH host for display.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ssh_host: Option<String>,
+    /// SSH user for display.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ssh_user: Option<String>,
 }
 
 #[cfg(test)]
@@ -177,6 +186,9 @@ mod tests {
             container_id: None,
             container_name: None,
             container_image: None,
+            ssh_connection_id: None,
+            ssh_host: None,
+            ssh_user: None,
         };
         let msg = CoreServerMessage::SessionList {
             sessions: vec![info],
@@ -251,6 +263,9 @@ mod tests {
             container_id: None,
             container_name: None,
             container_image: None,
+            ssh_connection_id: None,
+            ssh_host: None,
+            ssh_user: None,
         };
         let json = serde_json::to_string(&info).unwrap();
         assert!(json.contains(r#""exit_code":0"#));

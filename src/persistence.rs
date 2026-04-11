@@ -22,6 +22,8 @@ pub struct PersistedSession {
     pub state: String,
     #[serde(default)]
     pub container_id: Option<String>,
+    #[serde(default)]
+    pub ssh_connection_id: Option<String>,
 }
 
 /// Container for all persisted sessions.
@@ -88,6 +90,7 @@ pub fn build_persisted_data(sessions: &crate::session::SessionMap) -> PersistedS
             pid: None,
             state: format!("{:?}", s.state),
             container_id: s.container_id.clone(),
+            ssh_connection_id: s.ssh_connection_id.clone(),
         })
         .collect();
     PersistedSessionData {
@@ -243,6 +246,7 @@ mod tests {
             pid: Some(1234),
             state: "Running".to_string(),
             container_id: None,
+            ssh_connection_id: None,
         };
         let json = serde_json::to_string(&session).unwrap();
         assert!(json.contains("abc-123"));
@@ -292,6 +296,7 @@ mod tests {
                 pid: Some(111),
                 state: "Running".to_string(),
                 container_id: None,
+                ssh_connection_id: None,
             }],
         };
 
